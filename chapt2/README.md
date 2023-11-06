@@ -1,0 +1,54 @@
+# 객체 생성과 파괴
+
+## 도입
+> 2 장에서는 객체를 만들어야 할 때와 만들지 말아야 할 때를 구분하는 법
+
+> 올바른 객체 생성 방법과 불필요한 생성을 피하는 방법
+
+> 객체가 제때 파괴됨을 보장하고 파괴전에 수행해야할 정리작업을 관리하는 요령
+
+## 생성자 대신 정적 팩터리 메서드를 고려하라
+- Class는 static factory method를 제공
+    ```java
+  public static Boolean valueOf(boolean b) {
+        return b ? Boolean.TRUE : Boolean.FALSE;
+  }
+  ```
+  **장점**
+  - 이름을 가질 수 있다
+  - 호출될 때마다 인스턴스를 새로 생성하지 않아도 된다. 미리 생성된 인스턴스를 재사용하여 메모리 사용을 최적화하고 객체 생성 및 소멸의 오버헤드를 줄이는 데 도움
+    - 예시: Boolean.valueOf(boolean)
+    - 플라이웨이트 패턴(같은 객체가 자주 요청되는 상황): 메모리 사용을 최적화하기 위해 사용되는 
+      구조적 패턴입니다. 이 패턴은 다수의 비슷한 객체를 효율적으로 공유하여 생성 및 메모리 사용을 최소화하는 데 사용됩니다.
+  - 반환 타입의 하위 타입 객체를 반환할 수 있는 능력이 있다 
+  - 입력 매개변수에 따라 매번 다른 클래스의 객체를 반환할 수 있다
+    - 예를 들어, Boolean.valueOf(boolean) 메서드는 입력된 boolean 값에 따라 Boolean.TRUE 또는 Boolean.FALSE를 반환하는데, 이것은 두 가지 서로 다른 클래스의 객체를 반환하는 예시.
+  - 정적 팩터리 메서드를 작성하는 시점에는 반환할 객체 클래스가 존재하지 않아도 된다
+  - 
+  
+? "시그니처가 같은 생성자" : 오버로딩!
+
+  **단점**
+  - 상속을 하려면 public이나 protected 생성자가 필요하여 정적 팩터리만 제공하면 하위 클래스를 만들 수 없다.
+  - 정적 팩터리 메서드는 프로그래머가 찾기 어렵다
+
+## 자주 사용되는 명명 방식들
+1. from: 매개변수를 하나 받아서 해당 타입의인스턴스를 반환하는 형변환 메서드
+  - Ex. Date d = Date.from(instant);
+2. of: 여러 매개변수를 받아 적합한 타입의 인스턴스를 반환하는 집계 메서드
+3. instance 혹은 getInstance: 매개변수로 명시한 인스턴스를 반환하지만, 같은 인스턴스임을 보장하지 않는다
+4. create 혹은 newInstance: instance 혹은 getInstance와 같지만 매번 새로운 인스턴스를 생성해 반환함을 보장한다
+5. getType: getInstance와 같으나 생성할 클래스가 아닌 다른 클래스에 팩터리 메서드를 정의할 때 쓴다. "Type"은 팩터리 메서드가 반환할 객체 타입이다
+6. newType: newInstance와 같으나, 생성할 클래스가 아닌 다른 클래스에 팩터리 메서드를 정의할 때 쓴다. "Type"은 팩터리 메서드가 반환할 객체 타입이다
+  - BufferedReader br = Files.newBufferedReader(path);
+    - new연산자를 직접 사용하는 대신 정적 팩터리메서드의 팩토리 메서드를 사용. 이 패턴을 사용하면 객체 생성 및 초기화를 캡슐화하고 클라이언트 코드에서 객체 생성 과정을 추상화할 수 있습니다
+7. type: getType와 newType의 간결한 버전
+  ```java
+    List<Complaint> Library = Collections.list(legacyLitany)
+  ```
+- Collections.list(legacyLitany) 메서드는 legacyLitany라는 Enumeration 타입을 가진 컬렉션을 List<Complaint>로 변환하는 메서드입니다. 이것은 주로 Java의 구식(legacy) 코드에서 새로운 형식의 컬렉션을 사용해야 할 때 유용.
+
+
+> 정적 팩터리 메서드와 public 생성자는 각자의 쓰임새가 있으니 상대적인 장단점 파악해야한다
+
+> 정적 팩터리를 사용하면 유리한 경우도 많으므로 public 생성자를 제공하던 습관이 있다면 고쳐보자!
