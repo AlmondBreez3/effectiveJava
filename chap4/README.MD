@@ -185,15 +185,55 @@ public boolean addAll(Collection<? extends E> c) {
 addAll메서드에는 각 요소를 add메서드를 호출해서 추가하므로 addCount를 증가시키는 코드가 없어야 한다
 
 해결방법? 메서드를 재정의하는 것보다 새로 만들자!
-- 기존 클래스를 확장하는 대신에 새로운 클래스를 만들고 private field로 기존 클래스의 인스턴스를
+- 기존 클래스를 *확장하는* 대신에 새로운 클래스를 만들고 private field로 기존 클래스의 인스턴스를
     참조하게 하면 된다. 기존 클래스가 새로운 클래스의 구성요소로 쓰인다는 뜻에서 이를 컴포지션이라고 한다
 - 새로운 클래스의 인스턴스 메서드들은 기존 클래스에 대응하는 메서드를 호출해 그 결과를 반환한다. 이를 전달이라고 한다
+- 기존 클래스를 확장하는 대신에 새로운 클래스를 만들고 private 필드로 기존 클래스의 인스턴스를 참조하게 하면 됩니다. 기존 클래스가 새로운 클래스의 구성요소로 쓰인다는 뜻에서 이를 컴포지션(Composition)이라고 한다
+
+```java
+public class MySet<E> extends ForwardingSet<E>  {
+    private int addCount = 0;
+
+    public MySet(Set<E> set) {
+        super(set);
+    }
+
+    @Override
+    public boolean add(E e) {
+        addCount++;
+        return super.add(e);
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends E> collection) {
+        addCount = addCount + collection.size();
+        return super.addAll(collection);
+    }
+
+    public int getAddCount() {
+        return addCount;
+    }
+}
+
+public class ForwardingSet<E> implements Set<E> {
+    private final Set<E> set;
+    public ForwardingSet(Set<E> set) { this.set = set; }
+    public void clear() { set.clear(); }
+    public boolean isEmpty() { return set.isEmpbty(); }
+    public boolean add(E e) { return set.add(e); }
+    public boolean addAll(Collection<? extends E> c) { return set.addAll(c); }
+    // ... 생략
+}
+```
+
+- 인스턴스를 감싸고 있다는 뜻에서 MySet과 같은 클래스를 래퍼 클래스라고 하며 다른 Set에 계측 기능을 덧씌운다는 뜻에서 데코레이터 패턴(Decorator Pattern)이라고 합니다
 
 그럼 상속은 언제?
 - 클래스 B가 클래스 A와 is-a관계일때만 사용해야 한다
 
 
 ## 질문
-- BigSet랑 BigInteger의 큰 차이는?
+- BigSet랑 BigInteger의 큰 차이는? -4장할 때
 - 정적 팩터리 방식에 대해 얘기해보고 싶다
 
+int / BigInteger 
